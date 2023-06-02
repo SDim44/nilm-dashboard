@@ -32,6 +32,8 @@
     <!-- Page level custom scripts -->
     <script src= "{{url_for('static',filename='js/demo/chart-area-demo.js')}}"></script>
     <script src= "{{url_for('static',filename='js/demo/chart-pie-demo.js')}}"></script>
+
+    <script src= "{{url_for('static',filename='js/chart-area.js')}}"></script>
     
 {% endblock %}
 
@@ -98,10 +100,9 @@
             <div class="bg-white py-2 collapse-inner rounded">
                 <h6 class="collapse-header">Available appliances:</h6>
                 <a class="collapse-item" href="/appliance/washingmachine">Washing Machine</a>
-                <a class="collapse-item" href="/appliance/dishwasher">Dish Washer</a>
-                <a class="collapse-item" href="/appliance/cooker">Cooker</a>
+                <a class="collapse-item" href="/appliance/fridge">Fridge</a>
+                <a class="collapse-item" href="/appliance/microwave">Microwave</a>
                 <a class="collapse-item" href="/appliance/kettle">Kettle</a>
-                <a class="collapse-item" href="/appliance/others">Remaining</a>
             </div>
         </div>
     </li>

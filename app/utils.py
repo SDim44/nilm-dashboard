@@ -1,34 +1,59 @@
 import os
+import pandas as pd
 from datetime import datetime
-from flask import Flask, request, redirect, url_for, render_template
 from werkzeug.utils import secure_filename
-from app import app
+# from .deepmodels import *
 
-basedir = os.path.abspath(os.path.dirname(__file__))
-UPLOAD_FOLDER = os.path.join(basedir,"static\\uploads")
-
+BASEDIR = os.path.abspath(os.path.dirname(__file__))
 ALLOWED_EXTENSIONS = {'csv'}
+SUPPORTED_APPLIANCES = {
+    "washingmachine":{
+        "name":"Washing Machine",
+        "seq2seq_weights":"seq2seq-temp-weights-washing_machine-epoch0.h5"},
+    "fridge":{
+        "name":"Fridge",
+        "seq2seq_weights":"seq2seq-temp-weights-fridge-epoch0.h5"},
+    "microwave":{
+        "name":"Microwave",
+        "seq2seq_weights":"seq2seq-temp-weights-microwave-epoch0.h5"},
+    "kettle":{
+        "name":"Kettle",
+        "seq2seq_weights":"seq2seq-temp-weights-kettle-epoch0.h5"}
+        }
+
+def get_appliance_name(appliance):
+    return SUPPORTED_APPLIANCES[appliance]['name']
 
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
-@app.route('/appliance/<appliance_name>', methods=['GET', 'POST'])
-def upload_file(appliance_name):
-    if request.method == 'POST':
-        file = request.files['file']
-        if file and allowed_file(file.filename):
-            timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-            filename = secure_filename(timestamp + "_" + appliance_name + ".csv") # der Dateiname wird jetzt auf appliance_name gesetzt
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'],filename))
-            return redirect(url_for('upload_file', appliance_name=appliance_name, filename=filename))
+def get_energy_data(appliance):
+    df = pd.read_csv(os.path.join(BASEDIR,"static","uploads","20230602-183306_washingmachine.csv"),sep=';')
+    df['Date'] = pd.to_datetime(df['Date'])
+    df = df.set_index('Date')
+    monthly_sum = df['Wh'].resample('M').sum()
+    monthly_sum.index = monthly_sum.index.strftime('%b')
+
+    labels = monthly_sum.index.to_list()
+    values = monthly_sum.values.tolist()
+    mean = round(monthly_sum.values.mean()/1000,2)
+    bills = round(monthly_sum.values.sum()*0.008/12,2)
+
+    return labels, values, mean, bills
+
+    
+
+# def predict_seq2seq(appliance):
+#     model = load_seq2seq_model(appliance)
+#     data = pd.read_csv(os.path.join(BASEDIR,"static","uploads","20230602-183306_washingmachine.csv"))
+#     prediction_raw = model.predict(data)
+#     prediction = aggregate_seq(prediction_raw)
+
+
         
-    # return '''
-    # <!doctype html>
-    # <title>Upload new .csv file</title>
-    # <h1>Upload new .csv file</h1>
-    # <form method=post enctype=multipart/form-data>
-    #   <input type=file name=file>
-    #   <input type=submit value=Upload>
-    # </form>
-    # '''
+# def load_seq2seq_model(appliance):
+#     model = return_seq2seq()
+#     w_path = os.path.join(BASEDIR,"weights",SUPPORTED_APPLIANCES[appliance]['seq2seq_weights'])
+#     model.load_weights(w_path)
+#     return model

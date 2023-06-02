@@ -1,6 +1,7 @@
 from flask import render_template
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask_appbuilder import ModelView, ModelRestApi
+from .utils import get_appliance_name, get_energy_data
 
 from . import appbuilder, db
 
@@ -73,7 +74,15 @@ class Home(BaseView):
         """
         This function allows provides an appliance name that need to be disaggregated and the 
         """
-        return self.render_template('appliance.html', appliance_name=appliance_name)
+        hist_lables, hist_data, mean, bills = get_energy_data(appliance_name)
+
+        return self.render_template('appliance.html', 
+            appliance_name=appliance_name,
+            appliance_title=get_appliance_name(appliance_name),
+            avg_conumption = mean, 
+            bills_anno = bills,
+            hist_lables = hist_lables,
+            hist_data = hist_data)
     
     # @expose('/appliance/<string:upload_path>')
     # def upload_path(self):
