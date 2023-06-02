@@ -38,6 +38,7 @@ from . import appbuilder, db
 
 from flask_appbuilder import AppBuilder, BaseView, expose, has_access
 from app import appbuilder
+from app import app
 
 
 class Home(BaseView):
@@ -74,6 +75,9 @@ class Home(BaseView):
         """
         return self.render_template('appliance.html', appliance_name=appliance_name)
     
+    # @expose('/appliance/<string:upload_path>')
+    # def upload_path(self):
+    #     return self.render_template('appliance.html', upload_path=app.config['UPLOAD_FOLDER'])
     
 
 appbuilder.add_view_no_menu(Home())

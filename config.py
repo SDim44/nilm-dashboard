@@ -82,13 +82,13 @@ LANGUAGES = {
 # Image and file configuration
 # ---------------------------------------------------
 # The file upload folder, when using models with files
-UPLOAD_FOLDER = basedir + "/app/static/uploads/"
+UPLOAD_FOLDER = os.path.join(basedir,"/app/static/uploads/")
 
 # The image upload folder, when using models with images
-IMG_UPLOAD_FOLDER = basedir + "/app/static/uploads/"
+IMG_UPLOAD_FOLDER = os.path.join(basedir + "/app/static/uploads/")
 
 # The image upload url, when using models with images
-IMG_UPLOAD_URL = "/static/uploads/"
+IMG_UPLOAD_URL = os.path.join("/static/uploads/")
 # Setup image size default is (300, 200, True)
 # IMG_SIZE = (300, 200, True)
 

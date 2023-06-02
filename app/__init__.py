@@ -1,4 +1,5 @@
 import logging
+import os
 
 from flask import Flask
 from flask_appbuilder import AppBuilder, SQLA
@@ -18,7 +19,8 @@ app.config.from_object("config")
 db = SQLA(app)
 appbuilder = AppBuilder(app, db.session,  base_template='base.html', indexview=MyIndexView)
 
-
+basedir = os.path.abspath(os.path.dirname(__file__))
+app.config['UPLOAD_FOLDER'] = os.path.join(basedir,"static\\uploads")
 
 """
 from sqlalchemy.engine import Engine
@@ -34,3 +36,4 @@ def set_sqlite_pragma(dbapi_connection, connection_record):
 """
 
 from . import views
+from .utils import *
