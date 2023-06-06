@@ -46,6 +46,9 @@ def upload_file(appliance_name):
         file = request.files['file']
         if file and allowed_file(file.filename):
             timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-            filename = secure_filename(timestamp + "_" + appliance_name + ".csv") # der Dateiname wird jetzt auf appliance_name gesetzt
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'],filename))
+            filename = secure_filename(timestamp + "_upload" + ".csv") # der Dateiname wird jetzt auf appliance_name gesetzt
+            
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'],filename)
+            file.save(file_path)
+            predict_seq2seq(file_path)
             return redirect(url_for('upload_file', appliance_name=appliance_name, filename=filename))
