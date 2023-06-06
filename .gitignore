@@ -1,2 +1,7 @@
 *.pyc
 *.csv
+__pycache__/config.cpython-38.pyc
+app/__pycache__/__init__.cpython-38.pyc
+app/__pycache__/__init__.cpython-39.pyc
+app/__pycache__/newindex.cpython-38.pyc
+app/__pycache__/views.cpython-38.pyc
