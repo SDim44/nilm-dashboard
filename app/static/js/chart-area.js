@@ -35,13 +35,13 @@ var myLineChart = new Chart(ctx, {
     labels: labels,
     datasets: [{
       label: "Power Consumption",
-      lineTension: 0.3,
+      lineTension: 0.1,
       backgroundColor: "rgba(78, 115, 223, 0.05)",
       borderColor: "rgba(78, 115, 223, 1)",
-      pointRadius: 3,
+      pointRadius: 1,
       pointBackgroundColor: "rgba(78, 115, 223, 1)",
       pointBorderColor: "rgba(78, 115, 223, 1)",
-      pointHoverRadius: 3,
+      pointHoverRadius: 5,
       pointHoverBackgroundColor: "rgba(78, 115, 223, 1)",
       pointHoverBorderColor: "rgba(78, 115, 223, 1)",
       pointHitRadius: 10,
@@ -110,7 +110,8 @@ var myLineChart = new Chart(ctx, {
       callbacks: {
         label: function(tooltipItem, chart) {
           var datasetLabel = chart.datasets[tooltipItem.datasetIndex].label || '';
-          return datasetLabel + ': KW' + number_format(tooltipItem.yLabel);
+          var yValue = tooltipItem.yLabel;
+          return datasetLabel + ': ' + number_format(yValue)+' Watt';
         }
       }
     }

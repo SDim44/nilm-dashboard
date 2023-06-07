@@ -1,7 +1,7 @@
 from flask import render_template
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask_appbuilder import ModelView, ModelRestApi
-from .utils import get_appliance_name, get_energy_data
+from .utils import get_appliance_name, get_energy_data,get_dashboard_data
 
 from . import appbuilder, db
 
@@ -38,16 +38,23 @@ from . import appbuilder, db
 """
 
 from flask_appbuilder import AppBuilder, BaseView, expose, has_access
+from flask_login import current_user
 from app import appbuilder
 from app import app
-
 
 class Home(BaseView):
     route_base = '/'
     @expose('/dashboard')
     def dashboard(self):
         self.update_redirect()
-        return self.render_template('dashboard.html')
+        hist_lables, hist_data, mean, bills, pie_values, pie_labels = get_dashboard_data(current_user.id,app.config['DATADB'])
+        return self.render_template('dashboard.html',
+            avg_conumption = mean, 
+            bills_anno = bills,
+            hist_lables = hist_lables,
+            hist_data = hist_data,
+            pie_values = pie_values, 
+            pie_labels = pie_labels)
 
     @expose('/history/<string:period>')
     def history(self, period):
@@ -74,7 +81,7 @@ class Home(BaseView):
         """
         This function allows provides an appliance name that need to be disaggregated and the 
         """
-        hist_lables, hist_data, mean, bills = get_energy_data(appliance_name)
+        hist_lables, hist_data, mean, bills = get_energy_data(appliance_name,current_user.id,app.config['DATADB'])
 
         return self.render_template('appliance.html', 
             appliance_name=appliance_name,
