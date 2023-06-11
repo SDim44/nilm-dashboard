@@ -1,7 +1,7 @@
 from flask import render_template
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask_appbuilder import ModelView, ModelRestApi
-from .utils import get_appliance_name, get_energy_data,get_dashboard_data
+from .utils import get_appliance_name, get_energy_data,get_dashboard_data,get_leaderboard_data
 
 from . import appbuilder, db
 
@@ -63,9 +63,10 @@ class Home(BaseView):
     
     @expose('/leaderboard')
     def leaderboard(self):
-        self.update_redirect()
-        return self.render_template('leaderboard.html')
-    
+        leaderboard_data = get_leaderboard_data(app.config['DATADB'])
+        app.logger.info(leaderboard_data)
+        return self.render_template('leaderboard.html', leaderboard_data=leaderboard_data, current_user_id=current_user.id)
+
     @expose('/forecasting')
     def forecasting(self):
         self.update_redirect()

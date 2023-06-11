@@ -115,6 +115,44 @@ def get_dashboard_data(user_id,engine):
     return labels, values, mean, bills, pie_values, pie_labels
 
 
+def get_leaderboard_data(engine):
+    # query to get all user ids
+    query_users = "SELECT DISTINCT user_id FROM powerconsumption"
+
+    users_df = pd.read_sql_query(query_users, engine)
+
+    leaderboard_data = []
+
+    for user_id in users_df['user_id'].values:
+        query = f"""
+            SELECT *
+            FROM powerconsumption 
+            WHERE user_id = {user_id}
+            """
+
+        df = pd.read_sql_query(query, engine)
+
+        if len(df) > 2:
+            df['timestamp'] = pd.to_datetime(df['timestamp'])
+            df = df.set_index('timestamp')
+            data = df['aggregate']
+
+            yearly_sum = data.resample('H').sum().resample('Y').mean()
+            bills = round(yearly_sum.values.mean() * 0.008, 2)
+            avg_consumption = round(data.mean() / 1000, 2)
+
+            leaderboard_data.append({
+                'user_id': user_id, 
+                'avg_consumption': avg_consumption, 
+                'bills': bills
+            })
+
+    leaderboard_data.sort(key=lambda x: x['bills'], reverse=False)
+
+    return leaderboard_data
+
+
+
 
 #---------------------------------------------------
 def normalise(df):

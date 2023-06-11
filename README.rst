@@ -15,4 +15,11 @@ Base Skeleton to start your application using Flask-AppBuilder
     $ flask run
 
 
-That's it!!
+- Registration
+    pip install flask-mail
+    
+    start smtp server: 
+        python -m smtpd -n -c DebuggingServer localhost:2525
+
+    register user
+    click on activation link in smtp server terminal

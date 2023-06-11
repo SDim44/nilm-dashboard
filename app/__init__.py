@@ -2,13 +2,53 @@ import logging
 import os
 from sqlalchemy import create_engine
 
-from flask import Flask, request, redirect, url_for
+from flask import Flask, request, redirect, url_for, flash
 from flask_appbuilder import AppBuilder, SQLA
 from flask_login import current_user
-
-
+from flask_appbuilder._compat import as_unicode
+from flask_appbuilder import AppBuilder
+from flask_appbuilder.security.sqla.manager import SecurityManager
 
 from app.newindex import MyIndexView
+
+
+"""
+    Overwriting for Registration
+"""
+from flask_appbuilder.security.registerviews import RegisterUserDBView
+
+class MyRegisterUserDBView(RegisterUserDBView):
+    def add(self, registration_form):
+        self.add_form_unique_validations(registration_form)
+
+        user = self.appbuilder.sm.add_user(
+            username=registration_form.username.data,
+            email=registration_form.email.data,
+            first_name=registration_form.first_name.data,
+            last_name=registration_form.last_name.data,
+            role=self.appbuilder.sm.find_role(
+                self.appbuilder.sm.auth_role_registration
+            ),
+            password=registration_form.password.data,
+        )
+
+        if user:
+            # These two lines auto-confirm the user
+            user.active = True
+            self.appbuilder.get_session.commit()
+
+            self.update_redirect()
+            return redirect(self.appbuilder.get_url_for_login)
+
+        else:
+            flash(as_unicode(self.error_message), "danger")
+            return redirect(self.appbuilder.get_url_for_index)
+
+
+# In your app initialization file
+class MySecurityManager(SecurityManager):
+    registeruserdbview = MyRegisterUserDBView
+
 
 """
  Logging configuration
@@ -20,7 +60,7 @@ logging.getLogger().setLevel(logging.DEBUG)
 app = Flask(__name__)
 app.config.from_object("config")
 db = SQLA(app)
-appbuilder = AppBuilder(app, db.session,  base_template='base.html', indexview=MyIndexView)
+appbuilder = AppBuilder(app, db.session,  security_manager_class=MySecurityManager, base_template='base.html', indexview=MyIndexView)
 
 
 

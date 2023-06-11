@@ -46,10 +46,23 @@ AUTH_TYPE = AUTH_DB
 # AUTH_ROLE_PUBLIC = 'Public'
 
 # Will allow user self registration
-# AUTH_USER_REGISTRATION = True
+AUTH_USER_REGISTRATION = True
 
 # The default user self registration role
-# AUTH_USER_REGISTRATION_ROLE = "Public"
+AUTH_USER_REGISTRATION_ROLE = "Public"
+
+# Config for Flask-WTF Recaptcha necessary for user registration
+#RECAPTCHA_ENABLED = False
+# Config for Flask-WTF Recaptcha necessary for user registration
+RECAPTCHA_PUBLIC_KEY = '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI'
+RECAPTCHA_PRIVATE_KEY = '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe'
+
+# Config for Flask-Mail necessary for user registration
+MAIL_SERVER = 'localhost'
+MAIL_PORT = 2525
+MAIL_USE_TLS = False
+MAIL_USE_SSL = False
+MAIL_DEFAULT_SENDER = 'noreply@localhost'
 
 # When using LDAP Auth, setup the ldap server
 # AUTH_LDAP_SERVER = "ldap://ldapserver.new"
