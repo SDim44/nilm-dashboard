@@ -24,7 +24,7 @@
                             <thead>
                                 <tr>
                                     <th scope="col">Rank</th>
-                                    <th scope="col">User ID</th>
+                                    <th scope="col">Name</th>
                                     <th scope="col">Average Consumption</th>
                                     <th scope="col">Bills</th>
                                 </tr>
@@ -33,7 +33,7 @@
                                 {% for user in leaderboard_data %}
                                 <tr style="{{ 'background-color: #d1ecf1; color: #0c5460;' if user.user_id == current_user_id else '' }}">
                                     <th scope="row">{{ loop.index }}</th>
-                                    <td>User {{ user.user_id }}</td>
+                                    <td>{{ user.user_id }}</td>
                                     <td>{{ user.avg_consumption }} kWh</td>
                                     <td>€ {{ user.bills }}</td>
                                 </tr>

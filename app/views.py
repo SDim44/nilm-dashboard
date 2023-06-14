@@ -1,7 +1,7 @@
 from flask import render_template
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask_appbuilder import ModelView, ModelRestApi
-from .utils import get_appliance_name, get_energy_data,get_dashboard_data,get_leaderboard_data
+from .utils import get_appliance_name, get_energy_data,get_dashboard_data,get_leaderboard_data,get_history_data
 
 from . import appbuilder, db
 
@@ -47,7 +47,7 @@ class Home(BaseView):
     @expose('/dashboard')
     def dashboard(self):
         self.update_redirect()
-        hist_lables, hist_data, mean, bills, pie_values, pie_labels = get_dashboard_data(current_user.id,app.config['DATADB'])
+        hist_lables, hist_data, mean, bills, pie_values, pie_labels = get_dashboard_data(current_user.id)
         return self.render_template('dashboard.html',
             avg_conumption = mean, 
             bills_anno = bills,
@@ -58,12 +58,15 @@ class Home(BaseView):
 
     @expose('/history/<string:period>')
     def history(self, period):
+        hist_lables, hist_data = get_history_data(current_user.id,period)
         self.update_redirect()
-        return self.render_template('history.html')
+        return self.render_template('history.html',
+                        hist_lables = hist_lables,
+                        hist_data = hist_data)
     
     @expose('/leaderboard')
     def leaderboard(self):
-        leaderboard_data = get_leaderboard_data(app.config['DATADB'])
+        leaderboard_data = get_leaderboard_data()
         app.logger.info(leaderboard_data)
         return self.render_template('leaderboard.html', leaderboard_data=leaderboard_data, current_user_id=current_user.id)
 
@@ -77,25 +80,21 @@ class Home(BaseView):
         self.update_redirect()
         return self.render_template('tips.html')
 
-    @expose('/appliance/<string:appliance_name>')
-    def appliance(self, appliance_name, model_name=None):
+    @expose('/appliance/<string:appliance_name>/<string:model_name>')
+    def appliance(self, appliance_name, model_name):
         """
         This function allows provides an appliance name that need to be disaggregated and the 
         """
-        hist_lables, hist_data, mean, bills = get_energy_data(appliance_name,current_user.id,app.config['DATADB'])
+        hist_lables, hist_data, mean, bills = get_energy_data(appliance_name,current_user.id,model_name)
 
         return self.render_template('appliance.html', 
             appliance_name=appliance_name,
             appliance_title=get_appliance_name(appliance_name),
+            model_name = model_name,
             avg_conumption = mean, 
             bills_anno = bills,
             hist_lables = hist_lables,
-            hist_data = hist_data)
-    
-    # @expose('/appliance/<string:upload_path>')
-    # def upload_path(self):
-    #     return self.render_template('appliance.html', upload_path=app.config['UPLOAD_FOLDER'])
-    
+            hist_data = hist_data)    
 
 appbuilder.add_view_no_menu(Home())
 

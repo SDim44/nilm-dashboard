@@ -9,8 +9,14 @@
         <!-- Page Heading -->
         <div class="d-sm-flex align-items-center justify-content-between mb-4">
             <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
-            <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
-                    class="fas fa-upload fa-sm text-white-50"></i>Upload new data</a>
+            <form id="upload-form" action="/dashboard" method="post" enctype="multipart/form-data" class="d-flex align-items-center">
+                <!-- Upload-Button -->
+                <a href="#" class="btn btn-primary shadow-sm mr-3" onclick="document.getElementById('file').click(); return false">
+                    <i class="fas fa-upload fa-sm text-white-50"></i>Upload data
+                </a>
+                <input type="file" name="file" id="file" style="display: none;" onchange="document.getElementById('upload-form').submit();">
+                <input type="submit" value="Upload" style="display: none;">
+            </form>
         </div>
 
          <!-- Content Row -->
@@ -167,6 +173,9 @@
                             </span>
                             <span class="mr-2">
                                 <i class="fas fa-circle text-info"></i> Microwave
+                            </span>
+                            <span class="mr-2">
+                                <i class="fas fa-circle text-info"></i> Kettle
                             </span>
                         </div>
                     </div>

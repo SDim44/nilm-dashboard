@@ -2,7 +2,7 @@ import logging
 import os
 from sqlalchemy import create_engine
 
-from flask import Flask, request, redirect, url_for, flash
+from flask import Flask, request, redirect, url_for, flash, jsonify
 from flask_appbuilder import AppBuilder, SQLA
 from flask_login import current_user
 from flask_appbuilder._compat import as_unicode
@@ -83,10 +83,10 @@ def set_sqlite_pragma(dbapi_connection, connection_record):
 from . import views
 from .utils import *
 
-@app.route('/appliance/<appliance_name>', methods=['GET', 'POST'])
-def upload_file(appliance_name):
+@app.route('/appliance/<appliance_name>/<model_name>', methods=['GET', 'POST'])
+def upload_file(appliance_name,model_name):
     app.config['UPLOAD_FOLDER'] = os.path.join(basedir,"static","uploads",str(current_user.id))
-
+    previous_page = request.referrer
     if not os.path.exists(app.config['UPLOAD_FOLDER']):
         os.makedirs(app.config['UPLOAD_FOLDER'],exist_ok=True)
 
@@ -96,11 +96,40 @@ def upload_file(appliance_name):
         if file and allowed_file(file.filename):
             timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
             filename = secure_filename(timestamp + "_upload" + ".csv") 
-            filename2 = secure_filename(timestamp + "_prediction" + ".csv") 
+            # filename2 = secure_filename(timestamp + "_prediction" + ".csv") 
             
             file_path = os.path.join(app.config['UPLOAD_FOLDER'],filename)
-            prediction_path = os.path.join(app.config['UPLOAD_FOLDER'],filename2)
+            # prediction_path = os.path.join(app.config['UPLOAD_FOLDER'],filename2)
             file.save(file_path)
-            predict_seq2seq(file_path, prediction_path,app.config['DATADB'],current_user.id)
-            return redirect(url_for('upload_file', appliance_name=appliance_name, filename=filename))
+            save_agg(file_path, current_user.id)
+            
+            return redirect(previous_page)
+            # return redirect(url_for('upload_file', filename=filename, appliance_name=appliance_name, model_name=model_name))
 
+@app.route('/dashboard', methods=['GET', 'POST'])
+def upload_file_from_dashboard():
+    app.config['UPLOAD_FOLDER'] = os.path.join(basedir,"static","uploads",str(current_user.id))
+    previous_page = request.referrer
+    if not os.path.exists(app.config['UPLOAD_FOLDER']):
+        os.makedirs(app.config['UPLOAD_FOLDER'],exist_ok=True)
+
+    if request.method == 'POST':
+        file = request.files['file']
+        
+        if file and allowed_file(file.filename):
+            timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+            filename = secure_filename(timestamp + "_upload" + ".csv")         
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'],filename)
+            file.save(file_path)
+            save_agg(file_path, current_user.id)
+            
+            return redirect(previous_page)
+
+@app.route('/appliance/<appliance_name>/<model_name>/predict', methods=['POST'])
+def predict_button(appliance_name, model_name):
+    predict(model_name,str(current_user.id))
+
+    # URL der vorherigen Seite ermitteln
+    previous_page = request.referrer
+
+    return redirect(previous_page)

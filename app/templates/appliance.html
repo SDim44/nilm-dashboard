@@ -7,23 +7,72 @@
     <!-- Page Heading -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">{{appliance_title}}</h1>
-
-        <!-- <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
-                class="fas fa-upload fa-sm text-white-50"></i>Upload new data</a> -->
-
-        <form id="upload-form" action="/appliance/{{appliance_name}}" method="post" enctype="multipart/form-data">
-            <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" onclick="document.getElementById('file').click(); return false">
-                <i class="fas fa-upload fa-sm text-white-50"></i>Upload data</a>
+    
+        <form id="upload-form" action="/appliance/{{appliance_name}}/{{model_name}}" method="post" enctype="multipart/form-data" class="d-flex align-items-center">
+            <!-- Upload-Button -->
+            <a href="#" class="btn btn-primary shadow-sm mr-3" onclick="document.getElementById('file').click(); return false">
+                <i class="fas fa-upload fa-sm text-white-50"></i>Upload data
+            </a>
             <input type="file" name="file" id="file" style="display: none;" onchange="document.getElementById('upload-form').submit();">
             <input type="submit" value="Upload" style="display: none;">
         </form>
-                
-                
+    </div>   
+    <!-- Dropdown-Menü -->
+    <div class="dropdown mr-3">
+        <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        </button>
+        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+            <a class="dropdown-item" href="/appliance/{{appliance_name}}/seq2seq">seq2seq</a>
+            <a class="dropdown-item" href="/appliance/{{appliance_name}}/seq2point">seq2point</a>
+            <a class="dropdown-item" href="/appliance/{{appliance_name}}/dae">dae</a>
+        </div>
+        <button id="predict-button" class="btn btn-primary">Predict</button>
 
-    </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                var dropdownItems = document.querySelectorAll('#dropdownMenuButton + .dropdown-menu .dropdown-item');
+                for (var i = 0; i < dropdownItems.length; i++) {
+                    dropdownItems[i].addEventListener('click', function(event) {
+                        event.preventDefault();
+                        document.getElementById('dropdownMenuButton').innerText = this.innerText;
+                        window.location = this.href;
+                    });
+                }
+        
+                var currentPath = window.location.pathname;
+                var pathParts = currentPath.split('/');
+                var model_name = pathParts[pathParts.length - 1]; // letzter Teil des Pfades
+                document.getElementById('dropdownMenuButton').innerText = model_name;
+        
+                // Funktion hinzufügen, die beim Klicken auf den "Predict"-Button ausgeführt wird
+                document.getElementById('predict-button').addEventListener('click', function() {
+                var applianceName = "{{appliance_name}}"; // Ersetzen Sie dies durch den tatsächlichen Wert
+                var url = "/appliance/" + applianceName + "/" + model_name + "/predict";
 
+                // AJAX Request an die /predict Route
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', url, true);
+                xhr.setRequestHeader('Content-Type', 'application/json');
+
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState == 4 && xhr.status == 200) {
+                        // Die Antwort vom Server entpacken
+                        var response = JSON.parse(xhr.responseText);
+
+                        // Zur vorherigen Seite zurückkehren
+                        window.location.href = response.redirect_path;
+                    }
+                };
+
+                xhr.send(JSON.stringify({ /* hier eventuelle Daten senden */ }));
+            });
+        });
+        </script>
     
-
+</div>
+    
+    
+    
 
     <!-- Content Row -->
     <div class="row">
