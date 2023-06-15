@@ -46,15 +46,16 @@ class Home(BaseView):
     route_base = '/'
     @expose('/dashboard')
     def dashboard(self):
+        hist_lables, hist_data, mean, bills, pie_values, pie_labels, saving = get_dashboard_data(current_user.id)
         self.update_redirect()
-        hist_lables, hist_data, mean, bills, pie_values, pie_labels = get_dashboard_data(current_user.id)
         return self.render_template('dashboard.html',
-            avg_conumption = mean, 
-            bills_anno = bills,
-            hist_lables = hist_lables,
-            hist_data = hist_data,
-            pie_values = pie_values, 
-            pie_labels = pie_labels)
+                        avg_conumption = mean, 
+                        bills_anno = bills,
+                        hist_lables = hist_lables,
+                        hist_data = hist_data,
+                        pie_values = pie_values, 
+                        pie_labels = pie_labels,
+                        saving = saving)
 
     @expose('/history/<string:period>')
     def history(self, period):

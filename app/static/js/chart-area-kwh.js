@@ -28,13 +28,13 @@ function number_format(number, decimals, dec_point, thousands_sep) {
 }
 
 // Area Chart Example
-var ctx = document.getElementById("Consumption_History").getContext('2d');
+var ctx = document.getElementById("Consumption_History_kWh").getContext('2d');
 var myLineChart = new Chart(ctx, {
   type: 'line',
   data: {
     labels: labels,
     datasets: [{
-      label: "Power Consumption",
+      label: "Power Consumption kWh",
       lineTension: 0.1,
       backgroundColor: "rgba(78, 115, 223, 0.05)",
       borderColor: "rgba(78, 115, 223, 1)",
@@ -78,8 +78,7 @@ var myLineChart = new Chart(ctx, {
           padding: 10,
           // Include a dollar sign in the ticks
           callback: function(value, index, values) {
-            return  '' + number_format(value,2);
-            // return  value.toFixed(2);
+            return  '' + number_format(value,3);
           }
         },
         gridLines: {
@@ -112,7 +111,7 @@ var myLineChart = new Chart(ctx, {
         label: function(tooltipItem, chart) {
           var datasetLabel = chart.datasets[tooltipItem.datasetIndex].label || '';
           var yValue = tooltipItem.yLabel;
-          return datasetLabel + ': ' + number_format(yValue,2) +' Wh';
+          return datasetLabel + ': ' + number_format(yValue,3) +' kWh';
         }
       }
     }

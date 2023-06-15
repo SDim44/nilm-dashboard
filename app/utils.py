@@ -2,6 +2,7 @@ import os
 import pandas as pd
 import numpy as np
 import sqlite3
+import json
 from sqlalchemy import create_engine
 from datetime import datetime,timedelta
 from werkzeug.utils import secure_filename
@@ -57,21 +58,21 @@ def get_energy_data(appliance,user_id,model_name):
 
     if len(df) > 2:
         df['timestamp'] = pd.to_datetime(df['timestamp'])
-        df = df.set_index('timestamp')
-        data = df[appliance]
-        hourly_sum = data.resample('H').sum()
+        df = df.set_index('timestamp').sort_index(ascending=False)
+        df['Wh'] = df[appliance] * (10/3600) # 10 = SampleRate
+        data = df['Wh']
+
+        hourly_sum = data.resample('H').sum().sort_index(ascending=True)
         hourly_sum.index = hourly_sum.index.strftime('%Y-%m-%d %H:%M')
-
-        monthly_sum = data.resample('H').sum().resample('M').mean()  # Summieren auf Monatsbasis
-        monthly_sum.index = monthly_sum.index.strftime('%Y-%m')
-
-        yearly_sum = data.resample('H').sum().resample('Y').mean()
-        yearly_sum.index = yearly_sum.index.strftime('%Y')
-
         labels = hourly_sum.index.to_list()
         values = hourly_sum.values.tolist()
-        mean = round(monthly_sum.values.mean()/1000, 2)
-        bills = round(yearly_sum.values.mean()*0.008, 2)
+
+
+        monthly = data.resample('M').sum().sort_index(ascending=False)
+        monthly.index = monthly.index.strftime('%b. %Y')
+
+        mean = round(monthly.values.mean()/1000, 2)
+        bills = round(mean*12*0.3, 2)
 
     else:
         labels=["no data"]
@@ -92,31 +93,34 @@ def get_history_data(user_id,period):
 
     if len(df) > 2:
         df['timestamp'] = pd.to_datetime(df['timestamp'])
-        df = df.set_index('timestamp')
+        df = df.set_index('timestamp').sort_index(ascending=False)
+        df['Wh'] = df['aggregate'] * (1/1000) * (10/3600) # 10 = SampleRate
+        data = df['Wh']
 
         if period == 'last3months':
             three_months_ago = datetime.now() - timedelta(days=90)
-            df = df[df.index >= three_months_ago]
-            df = df.resample('H').mean()
+            df = data[df.index >= three_months_ago]
+            df = df.resample('H').sum().sort_index(ascending=True)
             labels = df.index.strftime('%Y-%m-%d %H').to_list()
         elif period == 'lastyear':
             last_year = datetime.now() - timedelta(days=365)
-            df = df[df.index >= last_year]
-            df = df.resample('D').mean()
+            df = data[df.index >= last_year]
+            df = df.resample('D').sum().sort_index(ascending=True)
             labels = df.index.strftime('%d %b. %Y').to_list()
         else:
-            df = df.resample('D').mean()
+            df = data.resample('D').sum().sort_index(ascending=True)
             labels = df.index.strftime('%d %b. %Y').to_list()
 
 
         
-        values = df['aggregate'].tolist()
+        values = df.values.tolist()
 
     else:
         labels=["no data"]
         values=[0]
 
     return labels, values
+
 
 def get_dashboard_data(user_id):
 
@@ -136,28 +140,36 @@ def get_dashboard_data(user_id):
 
     if len(df) > 1:
         df['timestamp'] = pd.to_datetime(df['timestamp'])
-        df = df.set_index('timestamp')
-        data = df['aggregate']
+        df = df.set_index('timestamp').sort_index(ascending=False)
+        df['Wh'] = df['aggregate'] * (1/1000) * (10/3600) # 10 = SampleRate
+        data = df['Wh']
+
 
         six_months_ago = datetime.now() - timedelta(days=180)
-        day_sum = data[data.index >= six_months_ago]
-        day_sum = day_sum.resample('D').mean()
-        day_sum.index = day_sum.index.strftime('%b')
-        labels = day_sum.index.to_list()
-        values = day_sum.values.tolist()
+        data = data[data.index >= six_months_ago]
+        monthly = data.resample('M').sum().sort_index(ascending=True)
+        monthly.index = monthly.index.strftime('%b. %Y')
+        
+        labels = monthly.index.to_list()
+        values = [round(i,3) for i in monthly.values.tolist()]
 
+        monthly = data.resample('M').sum().sort_index(ascending=False)
+        monthly.index = monthly.index.strftime('%b. %Y')
 
-        monthly_sum = data.resample('H').sum().resample('M').mean()  # Summieren auf Monatsbasis
-        monthly_sum.index = monthly_sum.index.strftime('%Y-%m')
-        mean = round(monthly_sum.values.mean()/1000, 2)
+        try: # if less then one month is in data
+            this_m = monthly.values[0]
+            previouse_m = monthly.values[1]
+            saving = round((100 / previouse_m) * this_m,1)
+        except IndexError:
+            saving = 0
 
-        yearly_sum = data.resample('H').sum().resample('Y').mean()
-        yearly_sum.index = yearly_sum.index.strftime('%Y')
-        bills = round(yearly_sum.values.mean()*0.008, 2)
+        mean = round(monthly.values.mean(), 2)
+        bills = round(mean*12*0.3, 2)
         
     else:
         labels=["no data"]
         values=[0]
+        saving = 0
         mean = 0
         bills = 0
 
@@ -175,7 +187,7 @@ def get_dashboard_data(user_id):
         pie_values = [0]
         pie_labels = ["no data"]
 
-    return labels, values, mean, bills, pie_values, pie_labels
+    return labels, values, mean, bills, pie_values, pie_labels, saving
 
 
 def get_leaderboard_data():
@@ -197,18 +209,26 @@ def get_leaderboard_data():
         query_user = f'''select first_name, last_name from ab_user where id = {user_id}'''
         name = engine_user.execute(query_user).fetchall()[0]
 
-        if len(df) > 2:
+        if len(df) > 1:
             df['timestamp'] = pd.to_datetime(df['timestamp'])
-            df = df.set_index('timestamp')
-            data = df['aggregate']
+            df = df.set_index('timestamp').sort_index(ascending=False)
+            df['Wh'] = df['aggregate'] * (1/1000) * (10/3600) # 10 = SampleRate
+            data = df['Wh']
 
-            yearly_sum = data.resample('H').sum().resample('Y').mean()
-            bills = round(yearly_sum.values.mean() * 0.008, 2)
-            avg_consumption = round(data.mean() / 1000, 2)
+            six_months_ago = datetime.now() - timedelta(days=365)
+            data = data[data.index >= six_months_ago]
+            monthly = data.resample('M').sum().sort_index(ascending=False)
+            monthly.index = monthly.index.strftime('%b. %Y')
+            mean = round(monthly.values.mean()*12, 2)
+            bills = round(mean*0.3, 2)
+
+            # yearly_sum = data.resample('H').sum().resample('Y').mean()
+            # bills = round(yearly_sum.values.mean() * 0.008, 2)
+            # avg_consumption = round(data.mean() / 1000, 2)
 
             leaderboard_data.append({
                 'user_id': f'{name[0]} {name[1]}', 
-                'avg_consumption': avg_consumption, 
+                'avg_consumption': mean, 
                 'bills': bills
             })
 

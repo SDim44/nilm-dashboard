@@ -8,15 +8,15 @@
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">{{appliance_title}}</h1>
     
-        <form id="upload-form" action="/appliance/{{appliance_name}}/{{model_name}}" method="post" enctype="multipart/form-data" class="d-flex align-items-center">
+        <!-- <form id="upload-form" action="/appliance/{{appliance_name}}/{{model_name}}" method="post" enctype="multipart/form-data" class="d-flex align-items-center">
             <!-- Upload-Button -->
-            <a href="#" class="btn btn-primary shadow-sm mr-3" onclick="document.getElementById('file').click(); return false">
+            <!-- <a href="#" class="btn btn-primary shadow-sm mr-3" onclick="document.getElementById('file').click(); return false">
                 <i class="fas fa-upload fa-sm text-white-50"></i>Upload data
             </a>
             <input type="file" name="file" id="file" style="display: none;" onchange="document.getElementById('upload-form').submit();">
             <input type="submit" value="Upload" style="display: none;">
-        </form>
-    </div>   
+        </form> --> -->
+       
     <!-- Dropdown-Menü -->
     <div class="dropdown mr-3">
         <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -69,6 +69,7 @@
         });
         </script>
     
+    </div>
 </div>
     
     
@@ -124,7 +125,7 @@
                 <!-- Card Header - Dropdown -->
                 <div
                     class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-primary">History of Power consumption </h6>
+                    <h6 class="m-0 font-weight-bold text-primary">History of Power consumption</h6>
                     
                 </div>
                 <!-- Card Body -->

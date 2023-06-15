@@ -5,7 +5,7 @@
 
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <div style="margin-left: 50px;">
-        <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
+        <h1 class="h3 mb-0 text-gray-800">History</h1>
     </div>  
 </div>
 
@@ -24,17 +24,15 @@
             <!-- Card Body -->
         <div class="card-body">
             <div class="chart-area">
-                <canvas id="Consumption_History"></canvas>
+                <canvas id="Consumption_History_kWh"></canvas>
                 <script type="text/javascript">
                     var labels = {{ hist_lables|tojson|safe }};
                     var data = {{ hist_data|tojson|safe }};
                 </script>
                 <script src="{{ url_for('static', filename='js/chart-area.js') }}"></script>
-
             </div>
         </div>
     </div>
-
 </div>
 
 <!-- Content Row -->

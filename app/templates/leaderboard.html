@@ -34,8 +34,8 @@
                                 <tr style="{{ 'background-color: #d1ecf1; color: #0c5460;' if user.user_id == current_user_id else '' }}">
                                     <th scope="row">{{ loop.index }}</th>
                                     <td>{{ user.user_id }}</td>
-                                    <td>{{ user.avg_consumption }} kWh</td>
-                                    <td>€ {{ user.bills }}</td>
+                                    <td>{{ user.avg_consumption }} kWh / yr</td>
+                                    <td>{{ user.bills }} € / yr</td>
                                 </tr>
                             {% endfor %}
                             </tbody>
